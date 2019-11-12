@@ -41,15 +41,15 @@ public class Game extends Canvas implements Runnable, KeyListener {
 
 	// Tempo
 
-	public Tempo tempo;
-
 	// Get's and Set's
 
 	public int getLaguraTela() {
+
 		return laguraTela;
 	}
 
 	public int getAlturaTela() {
+
 		return alturaTela;
 	}
 
@@ -60,7 +60,6 @@ public class Game extends Canvas implements Runnable, KeyListener {
 		scaleTela = 3;
 
 		// Iniciando instaciais tempo
-		tempo = new Tempo();
 
 		// Iniciando os Controles
 
@@ -106,16 +105,22 @@ public class Game extends Canvas implements Runnable, KeyListener {
 
 	private synchronized void stop() {
 
+		isRunning = false;
+		try {
+			thread.join();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 	}
 
 	private void tick() {
 
-		
 		player.tick();
 		enemy.tick();
 		ball.tick();
 		gameController.tick();
-		
 
 	}
 
@@ -128,6 +133,8 @@ public class Game extends Canvas implements Runnable, KeyListener {
 		}
 
 		Graphics g = imageFundoDoJogo.getGraphics();
+		
+		
 
 		g.setColor(new Color(20));
 		g.fillRect(0, 0, laguraTela, alturaTela);
@@ -150,6 +157,8 @@ public class Game extends Canvas implements Runnable, KeyListener {
 		player.render(g);
 		ball.render(g);
 		enemy.render(g);
+		gameController.render(g);
+		
 		g.dispose();
 		g = bs.getDrawGraphics();
 
@@ -196,6 +205,7 @@ public class Game extends Canvas implements Runnable, KeyListener {
 			}
 
 		}
+		stop();
 
 	}
 
@@ -203,13 +213,46 @@ public class Game extends Canvas implements Runnable, KeyListener {
 	public void keyPressed(KeyEvent e) {
 		// TODO Auto-generated method stub
 		if (e.getKeyCode() == KeyEvent.VK_UP || e.getKeyCode() == KeyEvent.VK_W) {
+
+			if (player.getEntidadeController().getEstadoAtualEntidade() == ESTADOS_ENTIDADE.CHUTANDO) {
+
+				player.setUIponts(player.getUIponts() - player.getCustoChute());
+			}
+			player.getEntidadeController().mudarEstado(ESTADOS_ENTIDADE.INDO_PARA_CIMA);
+
 			player.setUp(true);
+
 		} else if (e.getKeyCode() == KeyEvent.VK_DOWN || e.getKeyCode() == KeyEvent.VK_S) {
+
+			player.getEntidadeController().mudarEstado(ESTADOS_ENTIDADE.INDO_PARA_BAIXO);
+
+			if (player.getEntidadeController().getEstadoAtualEntidade() == ESTADOS_ENTIDADE.CHUTANDO) {
+
+				player.setUIponts(player.getUIponts() - player.getCustoChute());
+			}
 			player.setDown(true);
 		}
 		if (e.getKeyCode() == KeyEvent.VK_P) {
 
-			gameController.controllerPause(1);
+			if (gameController.isPause() == false) {
+
+				gameController.mudeOEstadoGame(ESTADOS_GAME.PAUSE);
+				gameController.setPause(true);
+
+			} else if (gameController.isPause()) {
+
+				gameController.mudeOEstadoGame(ESTADOS_GAME.INGAME);
+				gameController.setPause(false);
+			}
+
+		}
+
+		if (e.getKeyCode() == KeyEvent.VK_K) {
+
+			if (player.podeChutar()) {
+				player.setUIponts(player.getUIponts() - player.getCustoChute());
+				player.getEntidadeController().mudarEstado(ESTADOS_ENTIDADE.CHUTANDO);
+			}
 
 		}
 
@@ -220,8 +263,15 @@ public class Game extends Canvas implements Runnable, KeyListener {
 		// TODO Auto-generated method stub
 		if (e.getKeyCode() == KeyEvent.VK_UP || e.getKeyCode() == KeyEvent.VK_W) {
 			player.setUp(false);
+			player.getEntidadeController().mudarEstado(ESTADOS_ENTIDADE.IDLE);
 		} else if (e.getKeyCode() == KeyEvent.VK_DOWN || e.getKeyCode() == KeyEvent.VK_S) {
+
+			player.getEntidadeController().mudarEstado(ESTADOS_ENTIDADE.IDLE);
+
 			player.setDown(false);
+		}
+		if (e.getKeyCode() == KeyEvent.VK_K) {
+			player.getEntidadeController().mudarEstado(ESTADOS_ENTIDADE.IDLE);
 		}
 
 	}

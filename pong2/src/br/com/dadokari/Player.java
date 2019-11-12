@@ -8,12 +8,12 @@ public class Player extends Entidade {
 
 	public Player(float posX, float posY, int largCorpo, int altCorpo, int cor, float velocidadeDoObjeto) {
 		super(posX, posY, largCorpo, altCorpo, cor, velocidadeDoObjeto);
-		tempo = new Tempo();
+		tempoParaPiscarScore = new Tempo();
 		// TODO Auto-generated constructor stub
 
 	}
 
-	public Tempo tempo;
+	private Tempo tempoParaPiscarScore;
 
 	private boolean up;
 	private boolean down;
@@ -36,6 +36,7 @@ public class Player extends Entidade {
 
 	@Override
 	public void tick() {
+
 		this.pontoScorePlayer();
 		controlesCimaBaixo();
 		this.colisaoObjeto();
@@ -49,18 +50,27 @@ public class Player extends Entidade {
 	public void render(Graphics g) {
 
 		super.render(g);
-		if (this.getEntidadeController().getEstadoAtualEntidade() != ESTADOS_ENTIDADE.PONTO) {
+
+		if (this.getEntidadeController().getEstadoAtualEntidade() == ESTADOS_ENTIDADE.CHUTANDO && this.podeChutar()) {
+			g.setColor(Color.MAGENTA);
+			g.fillRect((int) this.getPosicaoEixoX() + 5, (int) (this.getPosicaoEixoY() + 10), 5, 10);
+		}
+
+		if (Game.gameController.getEstadoAtualGame() != ESTADOS_GAME.PONTOPLAYER) {
 			g.setFont(new Font("arial", Font.BOLD, 10));
 			g.setColor(Color.white);
 			g.drawString(String.valueOf(this.getScore()), (int) (this.getPosicaoEixoX() - 20), 11);
-		} else if (this.getEntidadeController().getEstadoAtualEntidade() == ESTADOS_ENTIDADE.PONTO) {
-			if (tempo.acaoCadaTempoLoop(false, 5, 0.1f, 0.4f)) {
+
+		}else if (Game.gameController.getEstadoAtualGame() == ESTADOS_GAME.PONTOPLAYER) {
+			
+			if (tempoParaPiscarScore.acaoCadaTempoLoop(false, 5, 0.1f, 0.4f)) {
 				g.setFont(new Font("arial", Font.BOLD, 10));
-				g.setColor(Color.white);
+				g.setColor(Color.red);
 				g.drawString(String.valueOf(this.getScore()), (int) (this.getPosicaoEixoX() - 20), 11);
-				if (tempo.getAcaoCadaTempoLoopVar() == 5) {
-					this.getEntidadeController().mudarEstado(ESTADOS_ENTIDADE.ATIVO);
-					tempo.setAcaoCadaTempoLoopVar(0);
+
+				if (tempoParaPiscarScore.getAcaoCadaTempoLoopVar() == 5) {
+					Game.gameController.mudeOEstadoGame(ESTADOS_GAME.INGAME);
+					tempoParaPiscarScore.setAcaoCadaTempoLoopVar(0);
 
 				}
 			}
@@ -71,7 +81,7 @@ public class Player extends Entidade {
 
 	private void controlesCimaBaixo() {
 
-		if (Game.gameController.getEstadoAtualGame() == ESTADOS_GAME.INGAME) {
+		if (Game.gameController.getEstadoAtualGame() != ESTADOS_GAME.PAUSE) {
 			if (up) {
 
 				this.setPosicaoEixoY((this.getPosicaoEixoY() - getVelocidadeDoObjeto()));
@@ -85,27 +95,14 @@ public class Player extends Entidade {
 	public void pontoScorePlayer() {
 
 		if (Game.ball.getPosicaoEixoX() > Game.game.getLaguraTela()) {
-			this.getEntidadeController().mudarEstado(ESTADOS_ENTIDADE.PONTO);
-			System.out.println("ponto do jogador");
-			System.out.println(this.getEntidadeController().getEstadoAtualEntidade());
+
+			Game.gameController.mudeOEstadoGame(ESTADOS_GAME.PONTOPLAYER);
 			Game.ball.setPosicaoEixoX(Game.game.getLaguraTela() / 2 - Game.ball.getLaguraCorpo());
 			Game.ball.anguloBall();
 			this.setScore(this.getScore() + 1);
-			System.out.println(this.getEntidadeController().getEstadoAtualEntidade());
+			
 
 		}
-	}
-
-	private boolean podeAnimar() {
-
-		if (this.getEntidadeController().getEstadoAtualEntidade() == ESTADOS_ENTIDADE.PONTO) {
-			System.out.println("foi diferente");
-
-			return true;
-
-		}
-		return false;
-
 	}
 
 	/*

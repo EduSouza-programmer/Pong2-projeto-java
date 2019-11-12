@@ -1,36 +1,31 @@
 package br.com.dadokari;
 
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics;
+
+import javax.swing.text.StyledEditorKit.BoldAction;
+
 public class GameController {
 
-	private int pause;
+	private boolean pause;
 
 	private ESTADOS_GAME estadoAtuaGame;
 	private ESTADOS_GAME proximoEstadoGame;
+	private Tempo tempoParaRenderizarPause;
 
 	// Gets and sets
 
-	public int getPause() {
+	public boolean isPause() {
 		return this.pause;
 	}
 
-	public void setPause(int value) {
+	public void setPause(boolean value) {
 		this.pause = value;
 	}
 
 	public ESTADOS_GAME getEstadoAtualGame() {
 		return this.estadoAtuaGame;
-	}
-
-	public void setEstadoAtualGame(ESTADOS_GAME value) {
-		this.estadoAtuaGame = value;
-	}
-
-	public ESTADOS_GAME getProximoEstadoGame() {
-		return this.proximoEstadoGame;
-	}
-
-	public void setProximoEstadoGame(ESTADOS_GAME value) {
-		this.proximoEstadoGame = value;
 	}
 
 	public void mudeOEstadoGame(ESTADOS_GAME novoEstadoGame) {
@@ -39,20 +34,19 @@ public class GameController {
 
 	public GameController() {
 		proximoEstadoGame = ESTADOS_GAME.INGAME;
-		pause = 0;
+		tempoParaRenderizarPause = new Tempo();
+		pause = false;
 
 	}
 
 	public void tick() {
 
-		
-		isPause();
 		estadoAtuaGame = proximoEstadoGame;
 
 		switch (estadoAtuaGame) {
 		case INGAME:
-			//System.out.println(estadoAtuaGame);
-			
+			// System.out.println(estadoAtuaGame);
+
 			break;
 
 		case ENDGAME:
@@ -60,38 +54,48 @@ public class GameController {
 			break;
 
 		case PAUSE:
-			
+
 			break;
 
 		case START:
-			;
+
+			break;
+
+		case PONTOPLAYER:
+
+			break;
+
+		case PONTOENEMY:
+
+			break;
+
+		default:
 
 			break;
 
 		}
 	}
 
-	public void isPause() {
-
-		if (pause == 1) {
-
-			mudeOEstadoGame(ESTADOS_GAME.PAUSE);
-			//System.out.println(pause);
-
-		} else if (pause == 0) {
-
-			mudeOEstadoGame(ESTADOS_GAME.INGAME);
-			//System.out.println(pause);
-
-		}
+	public void render(Graphics g) {
+		renderizarPause(g);
 
 	}
 
-	public void controllerPause(int value) {
-		pause += 1;
-		if (pause >= 2) {
-			pause = 0;
+	private void renderizarPause(Graphics g) {
+
+		if (estadoAtuaGame == ESTADOS_GAME.PAUSE) {
+
+			g.setFont(new Font("arial", Font.BOLD, 20));
+			g.setColor(Color.white);
+			g.drawString("Pause", (Game.game.getLaguraTela() / 2) - 28, (Game.game.getAlturaTela() / 2) + 5);
+			if(tempoParaRenderizarPause.acaoCadaTempoLoop(true, 0, 0.3f, 0.5f)) {
+				g.setFont(new Font("arial", Font.BOLD, 20));
+				g.setColor(Color.MAGENTA);
+				g.drawString("Pause", (Game.game.getLaguraTela() / 2) - 28, (Game.game.getAlturaTela() / 2) + 5);
+				
+			}
 		}
+
 	}
 
 }
